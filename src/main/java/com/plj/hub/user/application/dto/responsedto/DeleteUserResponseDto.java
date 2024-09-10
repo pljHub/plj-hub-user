@@ -1,0 +1,15 @@
+package com.plj.hub.user.application.dto.responsedto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class DeleteUserResponseDto {
+    private Long userId;
+    private LocalDateTime deletedAt;
+}
