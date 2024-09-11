@@ -9,8 +9,8 @@ import com.plj.hub.user.domain.model.User;
 import com.plj.hub.user.domain.model.UserRole;
 import com.plj.hub.user.domain.repository.UserRepository;
 import com.plj.hub.user.global.dto.ResponseDto;
-import com.plj.hub.user.infrastructure.HubNotExistsException;
 import com.plj.hub.user.infrastructure.client.HubClient;
+import com.plj.hub.user.infrastructure.client.HubClientService;
 import com.plj.hub.user.infrastructure.dto.responsedto.GetHubResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +33,7 @@ public class UserService {
     private final SignUpAdapter signUpAdapter;
     private final JwtUtils jwtUtils;
     private final HubClient hubClient;
+    private final HubClientService hubClientService;
 
     /*
      * 회원 가입
@@ -44,11 +45,6 @@ public class UserService {
 
         verifySignupException(username, password, confirmPassword, slackId);
 
-        if (hubId != null) {
-            ResponseEntity<ResponseDto<GetHubResponseDto>> hubById = hubClient.getHubById(hubId);
-            verifyExistsHub(hubById);
-        }
-
         SignUp signUpHandler = signUpAdapter.getSignUpHandler(userRole);
 
         User user = signUpHandler.signUp(username, bCryptPasswordEncoder.encode(password), slackId, hubId);
@@ -59,11 +55,6 @@ public class UserService {
         return new SignUpResponseDto(savedUser.getId(), savedUser.getUsername(), savedUser.getRole());
     }
 
-    private void verifyExistsHub(ResponseEntity<ResponseDto<GetHubResponseDto>> hubById) {
-        if (hubById.getBody().getStatus().equals("error")) {
-            throw new HubNotExistsException();
-        }
-    }
 
     // 회원가입 검증
     private void verifySignupException(String username, String password, String confirmPassword, String slackId) {
@@ -76,7 +67,7 @@ public class UserService {
     private void verifyDuplicatedUsername(String username) {
         boolean value = userRepository.existsByUsername(username);
         if (value) {
-            log.info("중복된 아이디로 회원 가입 실패  username: {}", username);
+            log.warn("중복된 아이디로 회원 가입 실패  username: {}", username);
             throw new DuplicatedUsernameException();
         }
     }
@@ -85,7 +76,7 @@ public class UserService {
     private void verifyDuplicatedSlackId(String slackId) {
         boolean value = userRepository.existsBySlackId(slackId);
         if (value) {
-            log.info("중복된 slack 아이디로 회원 가입 실패 slackId: {}", slackId);
+            log.warn("중복된 slack 아이디로 회원 가입 실패 slackId: {}", slackId);
             throw new DuplicatedSlackIdException();
         }
     }
@@ -93,7 +84,7 @@ public class UserService {
     // 비밀번호 확인
     private void verifyMismatchPassword(String username, String password, String confirmPassword) {
         if (!password.equals(confirmPassword)) {
-            log.info("비밀번호 확인 실패로 회원 가입 실패  username: {}", username);
+            log.warn("비밀번호 확인 실패로 회원 가입 실패  username: {}", username);
             throw new PasswordMismatchException();
         }
     }
@@ -127,7 +118,7 @@ public class UserService {
     private void verifyPassword(String password, User user) {
         boolean matches = bCryptPasswordEncoder.matches(password, user.getPassword());
         if (!matches) {
-            log.info("로그인 요청, 비밀번호 인증 실패 username: {}", user.getUsername());
+            log.warn("로그인 요청, 비밀번호 인증 실패 username: {}", user.getUsername());
             throw new PasswordMismatchException();
         }
     }
@@ -140,7 +131,7 @@ public class UserService {
         log.info("slackId 업데이트 요청 userId: {}, currentUserId {}", userId, currentUserId);
 
         if (!UserRole.valueOf(currentUserRole).equals(UserRole.ADMIN) && !userId.equals(currentUserId)) {
-            log.info("slackId 업데이트 요청 실패 userId: {}, currentUserId {}", userId, currentUserId);
+            log.warn("slackId 업데이트 요청 실패 userId: {}, currentUserId {}", userId, currentUserId);
             throw new AccessDeniedException();
         }
 
@@ -172,10 +163,10 @@ public class UserService {
 
 
         ResponseEntity<ResponseDto<GetHubResponseDto>> hubById = hubClient.getHubById(hubId);
-        verifyExistsHub(hubById);
+        hubClientService.verifyExistsHub(hubById);
 
         if (!UserRole.valueOf(currentUserRole).equals(UserRole.ADMIN) && !userId.equals(currentUserId)) {
-            log.info("hub 업데이트 요청 실패 userId: {}, currentUserId {}", userId, currentUserId);
+            log.warn("hub 업데이트 요청 실패 userId: {}, currentUserId {}", userId, currentUserId);
             throw new AccessDeniedException();
         }
 
@@ -205,7 +196,7 @@ public class UserService {
         User currentUser = findUserById(currentUserId);
 
         if (!UserRole.valueOf(currentUserRole).equals(UserRole.ADMIN) && !user.equals(currentUser)) {
-            log.info("유저 삭제 요청 실패 userId: {}, currentUserId: {}, currentUserRole: {}", userId, currentUserId, currentUserRole);
+            log.warn("유저 삭제 요청 실패 userId: {}, currentUserId: {}, currentUserRole: {}", userId, currentUserId, currentUserRole);
             throw new AccessDeniedException();
         }
 
@@ -229,12 +220,12 @@ public class UserService {
 
 
         if (isDeliveryUser(currentUserRole) && !userId.equals(currentUserId)) {
-            log.info("배송자 권한 문제로 인한 유저 단 건 조회 실패 userId: {}, currentUserId: {}, currentUserRole: {}", userId, currentUserId, currentUserRole);
+            log.warn("배송자 권한 문제로 인한 유저 단 건 조회 실패 userId: {}, currentUserId: {}, currentUserRole: {}", userId, currentUserId, currentUserRole);
             throw new AccessDeniedException();
         }
 
         if (isHubManager(currentUserRole) && currentUser.getHubId() != user.getHubId()) {
-            log.info("허브 매니저 권한 문제로 인한 유저 단 건 조회 실패 userId: {}, currentUserId: {}, currentUserRole: {}", userId, currentUserId, currentUserRole);
+            log.warn("허브 매니저 권한 문제로 인한 유저 단 건 조회 실패 userId: {}, currentUserId: {}, currentUserRole: {}", userId, currentUserId, currentUserRole);
             throw new AccessDeniedException();
         }
 
@@ -258,15 +249,20 @@ public class UserService {
 
     public Page<GetUserResponseDto> getUsers(Long currentUserId, String currentUserRole, Pageable pageable) {
 
+        log.info("유저 전체 조회 요청 currentUserId: {}, currentUserRole: {}", currentUserId, currentUserRole);
+
         User currentUser = findUserById(currentUserId);
 
         Page<User> users;
 
         if (isHubManager(currentUserRole)) {
+            log.info("유저 전체 조회 요청 성공 currentUserId: {}, currentUserRole: {}", currentUserId, currentUserRole);
             users = userRepository.findAllByHubIdAndDeletedAtIsNull(currentUser.getHubId(), pageable);
         } else if (UserRole.ADMIN.equals(UserRole.valueOf(currentUserRole))) {
+            log.info("유저 전체 조회 요청 성공 currentUserId: {}, currentUserRole: {}", currentUserId, currentUserRole);
             users = userRepository.findAll(pageable);
         } else {
+            log.warn("유저 전체 조회 요청 실패 currentUserId: {}, currentUserRole: {}", currentUserId, currentUserRole);
             throw new AccessDeniedException();
         }
 
