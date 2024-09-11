@@ -4,7 +4,6 @@ import com.plj.hub.user.domain.model.HubDeliveryUser;
 import com.plj.hub.user.domain.model.User;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service

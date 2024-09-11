@@ -1,6 +1,5 @@
 package com.plj.hub.user.application.dto.responsedto;
 
-import com.plj.hub.user.domain.model.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 
