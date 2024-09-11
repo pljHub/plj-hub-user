@@ -10,4 +10,8 @@ import java.util.UUID;
 public class GetHubResponseDto {
 
     private UUID hubId;
+    private String name;
+    private String address;
+    private String latitude;
+    private String longitude;
 }
