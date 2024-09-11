@@ -294,6 +294,6 @@ gradle-app.setting
 id_rsa
 
 ### sql ###
-.sql
+*.sql
 # End of https://www.toptal.com/developers/gitignore/api/ssh
 
