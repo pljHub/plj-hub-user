@@ -8,15 +8,11 @@ import com.plj.hub.user.application.utils.JwtUtils;
 import com.plj.hub.user.domain.model.User;
 import com.plj.hub.user.domain.model.UserRole;
 import com.plj.hub.user.domain.repository.UserRepository;
-import com.plj.hub.user.global.dto.ResponseDto;
-import com.plj.hub.user.infrastructure.client.HubClient;
 import com.plj.hub.user.infrastructure.client.HubClientService;
-import com.plj.hub.user.infrastructure.dto.responsedto.GetHubResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +28,6 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final SignUpAdapter signUpAdapter;
     private final JwtUtils jwtUtils;
-    private final HubClient hubClient;
     private final HubClientService hubClientService;
 
     /*
@@ -161,9 +156,7 @@ public class UserService {
 
         verifyRoleForHub(user);
 
-
-        ResponseEntity<ResponseDto<GetHubResponseDto>> hubById = hubClient.getHubById(hubId);
-        hubClientService.verifyExistsHub(hubById);
+        hubClientService.verifyExistsHub(hubId);
 
         if (!UserRole.valueOf(currentUserRole).equals(UserRole.ADMIN) && !userId.equals(currentUserId)) {
             log.warn("hub 업데이트 요청 실패 userId: {}, currentUserId {}", userId, currentUserId);
