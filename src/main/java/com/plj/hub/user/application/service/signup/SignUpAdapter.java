@@ -1,44 +1,45 @@
 package com.plj.hub.user.application.service.signup;
 
+import com.plj.hub.user.application.exception.RoleNotExistsException;
 import com.plj.hub.user.domain.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
 public class SignUpAdapter {
 
-    public Map<UserRole, Object> signUpHandlerMap = new HashMap<>();
+    protected static final Map<UserRole, SignUp> signUpHandlerMap = new EnumMap<>(UserRole.class);
 
     @Autowired
     public SignUpAdapter(List<SignUp> signUpHandlerList) {
         for (SignUp signUpHandler : signUpHandlerList) {
             if (signUpHandler instanceof AdminSignUp) {
-                signUpHandlerMap.put(UserRole.ADMIN, new AdminSignUp());
+                signUpHandlerMap.put(UserRole.ADMIN, signUpHandler);
             }
 
             if (signUpHandler instanceof CompanyDeliveryUserSignUp) {
-                signUpHandlerMap.put(UserRole.COMPANY_DELIVERY_USER, new CompanyDeliveryUserSignUp());
+                signUpHandlerMap.put(UserRole.COMPANY_DELIVERY_USER, signUpHandler);
             }
 
             if (signUpHandler instanceof HubManagerSignUp) {
-                signUpHandlerMap.put(UserRole.HUB_MANAGER, new HubManagerSignUp());
+                signUpHandlerMap.put(UserRole.HUB_MANAGER, signUpHandler);
             }
 
             if (signUpHandler instanceof HubDeliveryUserSignUp) {
-                signUpHandlerMap.put(UserRole.HUB_DELIVERY_USER, new HubDeliveryUserSignUp());
+                signUpHandlerMap.put(UserRole.HUB_DELIVERY_USER, signUpHandler);
             }
         }
     }
 
     public SignUp getSignUpHandler(UserRole userRole) {
         if (!supports(userRole)) {
-            throw new IllegalArgumentException("해당 역할로는 회원가입 할 수 없습니다.");
+            throw new RoleNotExistsException();
         }
-        return (SignUp) signUpHandlerMap.get(userRole);
+        return signUpHandlerMap.get(userRole);
     }
 
     private boolean supports(UserRole userRole) {
