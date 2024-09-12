@@ -9,7 +9,7 @@ import java.util.UUID;
 @Service
 public class AdminSignUp implements SignUp{
     @Override
-    public User signUp(String username, String password, String slackId, UUID hubId) {
+    public User signUp(String username, String password, String slackId, UUID hubId, UUID companyId) {
         return Admin.signUp(username, password, slackId);
     }
 }

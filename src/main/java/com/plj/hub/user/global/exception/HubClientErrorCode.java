@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum HubClientErrorCode implements ErrorCode{
 
     HUB_NOT_EXISTS(HttpStatus.BAD_REQUEST, "존재하지 않는 허브입니다."),
+    COMPANY_NOT_EXISTS(HttpStatus.BAD_REQUEST, "존재하지 않는 업체입니다."),
     ;
 
     private final HttpStatus status;

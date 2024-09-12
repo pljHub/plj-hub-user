@@ -1,4 +1,4 @@
-package com.plj.hub.user.infrastructure.dto.responsedto;
+package com.plj.hub.user.infrastructure.dto.hub.responsedto;
 
 import lombok.Getter;
 import lombok.Setter;

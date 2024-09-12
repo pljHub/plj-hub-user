@@ -30,4 +30,9 @@ public class Admin extends User{
         return new Admin(username, password, slackId);
 
     }
+
+    @Override
+    public UUID getCompanyId() {
+        return null;
+    }
 }

@@ -44,6 +44,8 @@ public abstract class User extends AuditRecord{
 
     public abstract UUID getHubId();
 
+    public abstract UUID getCompanyId();
+
     public void deleteUser(User user) {
         delete(user);
     }

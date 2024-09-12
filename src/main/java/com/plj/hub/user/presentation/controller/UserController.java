@@ -31,7 +31,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<ResponseDto<SignUpResponseDto>> signUp(
             @Valid @RequestBody SignUpRequestDto signUpRequestDto) {
-        SignUpResponseDto signUpResponse = userService.signUp(signUpRequestDto.getUsername(), signUpRequestDto.getPassword(), signUpRequestDto.getConfirmPassword(), signUpRequestDto.getRole(), signUpRequestDto.getSlackId(), signUpRequestDto.getHubId());
+        SignUpResponseDto signUpResponse = userService.signUp(signUpRequestDto.getUsername(), signUpRequestDto.getPassword(), signUpRequestDto.getConfirmPassword(), signUpRequestDto.getRole(), signUpRequestDto.getSlackId(), signUpRequestDto.getHubId(), signUpRequestDto.getCompanyId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ResponseDto.success(HttpStatus.CREATED.name(), signUpResponse));

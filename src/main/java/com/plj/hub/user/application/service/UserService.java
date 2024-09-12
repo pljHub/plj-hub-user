@@ -8,7 +8,7 @@ import com.plj.hub.user.application.utils.JwtUtils;
 import com.plj.hub.user.domain.model.User;
 import com.plj.hub.user.domain.model.UserRole;
 import com.plj.hub.user.domain.repository.UserRepository;
-import com.plj.hub.user.infrastructure.client.HubClientService;
+import com.plj.hub.user.infrastructure.client.Hub.HubClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,18 +34,18 @@ public class UserService {
      * 회원 가입
      */
 
-    public SignUpResponseDto signUp(String username, String password, String confirmPassword, UserRole userRole, String slackId, UUID hubId) {
+    public SignUpResponseDto signUp(String username, String password, String confirmPassword, UserRole userRole, String slackId, UUID hubId, UUID companyId) {
 
-        log.info("회원 가입 요청 username: {}, userRole: {}, slackId: {}", username, userRole, slackId);
+        log.info("회원 가입 요청 username: {}, userRole: {}, slackId: {}, companyId: {}", username, userRole, slackId, companyId);
 
         verifySignupException(username, password, confirmPassword, slackId);
 
         SignUp signUpHandler = signUpAdapter.getSignUpHandler(userRole);
 
-        User user = signUpHandler.signUp(username, bCryptPasswordEncoder.encode(password), slackId, hubId);
+        User user = signUpHandler.signUp(username, bCryptPasswordEncoder.encode(password), slackId, hubId, companyId);
         User savedUser = userRepository.save(user);
 
-        log.info("회원 가입 성공 username: {}, userRole: {}, slackId: {}", username, userRole, slackId);
+        log.info("회원 가입 성공 username: {}, userRole: {}, slackId: {}, companyId: {}", username, userRole, slackId, companyId);
 
         return new SignUpResponseDto(savedUser.getId(), savedUser.getUsername(), savedUser.getRole());
     }

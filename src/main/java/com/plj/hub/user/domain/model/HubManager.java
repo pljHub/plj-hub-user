@@ -1,5 +1,6 @@
 package com.plj.hub.user.domain.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Getter;
@@ -26,5 +27,10 @@ public class HubManager extends User{
     @Override
     public void updateHubs(UUID hubId) {
         this.hubId = hubId;
+    }
+
+    @Override
+    public UUID getCompanyId() {
+        return null;
     }
 }

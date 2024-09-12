@@ -1,7 +1,8 @@
-package com.plj.hub.user.infrastructure.client;
+package com.plj.hub.user.infrastructure.client.Hub;
 
 import com.plj.hub.user.global.dto.ResponseDto;
-import com.plj.hub.user.infrastructure.dto.responsedto.GetHubResponseDto;
+import com.plj.hub.user.infrastructure.dto.hub.responsedto.GetCompanyResponseDto;
+import com.plj.hub.user.infrastructure.dto.hub.responsedto.GetHubResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,5 +23,8 @@ public interface HubClient {
 
     @GetMapping("/api/hubs/{hubId}")
     ResponseEntity<ResponseDto<GetHubResponseDto>> getHubById(@PathVariable("hubId") UUID hubId);
+
+    @GetMapping("/api/companies/{companyId}")
+    ResponseEntity<ResponseDto<GetCompanyResponseDto>> getCompanyById(@PathVariable("companyId") UUID companyId);
 
 }

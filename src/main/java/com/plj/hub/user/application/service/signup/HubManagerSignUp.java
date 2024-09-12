@@ -2,7 +2,7 @@ package com.plj.hub.user.application.service.signup;
 
 import com.plj.hub.user.domain.model.HubManager;
 import com.plj.hub.user.domain.model.User;
-import com.plj.hub.user.infrastructure.client.HubClientService;
+import com.plj.hub.user.infrastructure.client.Hub.HubClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ public class HubManagerSignUp implements SignUp{
     private final HubClientService hubClientService;
 
     @Override
-    public User signUp(String username, String password, String slackId, UUID hubId) {
+    public User signUp(String username, String password, String slackId, UUID hubId, UUID companyId) {
 
         hubClientService.verifyExistsHub(hubId);
 

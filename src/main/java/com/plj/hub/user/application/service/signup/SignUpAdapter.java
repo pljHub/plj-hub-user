@@ -32,6 +32,10 @@ public class SignUpAdapter {
             if (signUpHandler instanceof HubDeliveryUserSignUp) {
                 signUpHandlerMap.put(UserRole.HUB_DELIVERY_USER, signUpHandler);
             }
+
+            if (signUpHandler instanceof CompanyManagerSignUp) {
+                signUpHandlerMap.put(UserRole.COMPANY_MANAGER, signUpHandler);
+            }
         }
     }
 

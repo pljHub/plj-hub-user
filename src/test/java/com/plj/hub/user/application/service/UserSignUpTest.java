@@ -37,7 +37,7 @@ class UserSignUpTest {
         UserRole role = UserRole.ADMIN;
         String slackId = "test1";
 
-        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, null);
+        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, null, null);
         User user = userRepository.findById(signUpResponseDto.getUserId()).get();
         Assertions.assertThat(user.getId()).isEqualTo(signUpResponseDto.getUserId());
     }
@@ -54,7 +54,7 @@ class UserSignUpTest {
         String slackId = "test1";
         UUID hubId = UUID.fromString("04f028b5-ffca-45fa-9026-02b5d568a00d");
 
-        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, hubId);
+        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, hubId, null);
         User user = userRepository.findById(signUpResponseDto.getUserId()).get();
         Assertions.assertThat(user.getId()).isEqualTo(signUpResponseDto.getUserId());
     }
@@ -71,7 +71,7 @@ class UserSignUpTest {
         String slackId = "test1";
         UUID hubId = UUID.fromString("04f028b5-ffca-45fa-9026-02b5d568a00d");
 
-        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, hubId);
+        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, hubId, null);
         User user = userRepository.findById(signUpResponseDto.getUserId()).get();
         Assertions.assertThat(user.getId()).isEqualTo(signUpResponseDto.getUserId());
     }
@@ -88,10 +88,29 @@ class UserSignUpTest {
         String slackId = "test1";
         UUID hubId = UUID.fromString("04f028b5-ffca-45fa-9026-02b5d568a00d");
 
-        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, hubId);
+        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, hubId, null);
         User user = userRepository.findById(signUpResponseDto.getUserId()).get();
         Assertions.assertThat(user.getId()).isEqualTo(signUpResponseDto.getUserId());
     }
+
+    @Transactional
+    @Test
+    @DisplayName("COMPANY_MANAGER 회원 가입 테스트")
+    void CompanyManagerSignUpTest() {
+
+        String username = "sanghoon123";
+        String password = "asdf123@";
+        String confirmPassword = "asdf123@";
+        UserRole role = UserRole.COMPANY_MANAGER;
+        String slackId = "test1";
+        UUID hubId = UUID.fromString("04f028b5-ffca-45fa-9026-02b5d568a00d");
+        UUID companyId = UUID.fromString("e1bea00f-4337-4d13-ad1f-ebb0405a94cb");
+
+        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, hubId, companyId);
+        User user = userRepository.findById(signUpResponseDto.getUserId()).get();
+        Assertions.assertThat(user.getId()).isEqualTo(signUpResponseDto.getUserId());
+    }
+
 
     @Test
     @Transactional
@@ -103,9 +122,9 @@ class UserSignUpTest {
         UserRole role = UserRole.ADMIN;
         String slackId = null;
 
-        userService.signUp(username, password, confirmPassword, role, slackId, null);
+        userService.signUp(username, password, confirmPassword, role, slackId, null, null);
 
-        org.junit.jupiter.api.Assertions.assertThrows(DuplicatedUsernameException.class, () -> userService.signUp(username, password, confirmPassword, role, "asdf123", null));
+        org.junit.jupiter.api.Assertions.assertThrows(DuplicatedUsernameException.class, () -> userService.signUp(username, password, confirmPassword, role, "asdf123", null, null));
     }
 
     @Test
@@ -119,7 +138,7 @@ class UserSignUpTest {
         String slackId = null;
         UUID uuid = UUID.randomUUID();
 
-        org.junit.jupiter.api.Assertions.assertThrows(PasswordMismatchException.class, () -> userService.signUp(username, password, confirmPassword, role, slackId, uuid));
+        org.junit.jupiter.api.Assertions.assertThrows(PasswordMismatchException.class, () -> userService.signUp(username, password, confirmPassword, role, slackId, uuid, null));
     }
 
 

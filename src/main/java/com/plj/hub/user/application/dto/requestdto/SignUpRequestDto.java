@@ -32,4 +32,6 @@ public class SignUpRequestDto {
     private UserRole role;
 
     private UUID hubId;
+
+    private UUID companyId;
 }

@@ -36,6 +36,9 @@ dependencies {
 	// config-client
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
+	// webclient
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'

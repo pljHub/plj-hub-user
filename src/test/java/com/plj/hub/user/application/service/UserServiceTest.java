@@ -38,7 +38,7 @@ class UserServiceTest {
         UserRole role = UserRole.ADMIN;
         String slackId = "admin123";
 
-        userService.signUp(username, password, confirmPassword, role, slackId, null);
+        userService.signUp(username, password, confirmPassword, role, slackId, null, null);
         userService.signIn(username, password);
     }
 
@@ -93,7 +93,7 @@ class UserServiceTest {
 
 
         // 본인이 본인 수정
-        SignUpResponseDto signUpResponseDto1 = userService.signUp(username, password, confirmPassword, role, slackId, null);
+        SignUpResponseDto signUpResponseDto1 = userService.signUp(username, password, confirmPassword, role, slackId, null, null);
         SignInResponseDto signInResponseDto1 = userService.signIn(username, password);
 
         String accessToken = signInResponseDto1.getAccessToken();
@@ -110,7 +110,7 @@ class UserServiceTest {
 
         // ADMIN 으로 수정하기 테스트
 
-        userService.signUp(username2, password2, confirmPassword2, role2, slackId2, null);
+        userService.signUp(username2, password2, confirmPassword2, role2, slackId2, null, null);
 
         SignInResponseDto signInResponseDto2 = userService.signIn(username2, password2);
         String accessToken2 = signInResponseDto2.getAccessToken();
@@ -143,7 +143,7 @@ class UserServiceTest {
         String slackId2 = null;
 
         // 본인이 본인 수정
-        SignUpResponseDto signUpResponseDto1 = userService.signUp(username, password, confirmPassword, role, slackId, null);
+        SignUpResponseDto signUpResponseDto1 = userService.signUp(username, password, confirmPassword, role, slackId, null, null);
         SignInResponseDto signInResponseDto1 = userService.signIn(username, password);
 
         String accessToken = signInResponseDto1.getAccessToken();
@@ -160,7 +160,7 @@ class UserServiceTest {
 
         // ADMIN 으로 수정하기 테스트
 
-        userService.signUp(username2, password2, confirmPassword2, role2, slackId2, null);
+        userService.signUp(username2, password2, confirmPassword2, role2, slackId2, null, null);
 
         SignInResponseDto signInResponseDto2 = userService.signIn(username2, password2);
         String accessToken2 = signInResponseDto2.getAccessToken();
@@ -187,7 +187,7 @@ class UserServiceTest {
         UUID hubId = UUID.fromString("04f028b5-ffca-45fa-9026-02b5d568a00d");
 
         UUID toUpdateHubId = UUID.fromString("78a8bd22-0893-413e-97b8-ac68e6dee5e0");
-        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, hubId);
+        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, hubId, null);
 
         UpdateHubResponseDto updateHubResponse = userService.updateHub(signUpResponseDto.getUserId(), 1L, "ADMIN", toUpdateHubId);
         Assertions.assertThat(updateHubResponse.getHubId()).isEqualTo(toUpdateHubId);

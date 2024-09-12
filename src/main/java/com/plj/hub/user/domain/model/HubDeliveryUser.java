@@ -31,4 +31,9 @@ public class HubDeliveryUser extends User{
         return new HubDeliveryUser(username, password, slackId);
 
     }
+
+    @Override
+    public UUID getCompanyId() {
+        return null;
+    }
 }
