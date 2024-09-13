@@ -108,7 +108,7 @@ public class UserController {
      * 회원 단 건 조회 내부 호출
      */
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/internal")
     public ResponseEntity<ResponseDto<GetUserResponseDto>> getUserInternal(@PathVariable(name = "id") Long userId) {
         GetUserResponseDto getUserResponse = userService.getUserInternal(userId);
         return ResponseEntity
