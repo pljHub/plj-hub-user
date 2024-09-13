@@ -18,6 +18,7 @@ public class GetUserResponseDto {
     private String role;
     private String slackId;
     private UUID hubId;
+    private UUID companyId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -27,6 +28,7 @@ public class GetUserResponseDto {
         role = user.getRole();
         slackId = user.getSlackId();
         hubId = user.getHubId();
+        companyId = user.getCompanyId();
         createdAt = user.getCreatedAt();
         updatedAt = user.getUpdatedAt();
     }

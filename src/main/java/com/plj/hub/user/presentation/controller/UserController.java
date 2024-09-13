@@ -105,6 +105,18 @@ public class UserController {
     }
 
     /*
+     * 회원 단 건 조회 내부 호출
+     */
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDto<GetUserResponseDto>> getUserInternal(@PathVariable(name = "id") Long userId) {
+        GetUserResponseDto getUserResponse = userService.getUserInternal(userId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.success(HttpStatus.OK.name(), getUserResponse));
+    }
+
+    /*
      * 회원 전체 조회
      */
     @GetMapping

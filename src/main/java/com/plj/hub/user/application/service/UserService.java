@@ -228,6 +228,20 @@ public class UserService {
         return new GetUserResponseDto(findUser);
     }
 
+    /*
+     * 유저 단 건 조회 내부 호출
+     */
+    public GetUserResponseDto getUserInternal(Long userId) {
+
+        log.info("유저 단 건 조회 내부 요청 userId: {}", userId);
+
+        User findUser = findUserById(userId);
+
+        log.info("유저 단 건 조회 요청 성공 userId: {}", userId);
+
+        return new GetUserResponseDto(findUser);
+    }
+
     private boolean isDeliveryUser(String currentUserRole) {
         return Arrays.asList(UserRole.HUB_DELIVERY_USER, UserRole.COMPANY_DELIVERY_USER).contains(UserRole.valueOf(currentUserRole));
     }
