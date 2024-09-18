@@ -1,4 +1,4 @@
-package com.plj.hub.user.infrastructure.client.Hub;
+package com.plj.hub.user.infrastructure.client.hub;
 
 import com.plj.hub.user.global.dto.ResponseDto;
 import com.plj.hub.user.infrastructure.dto.hub.responsedto.GetCompanyResponseDto;

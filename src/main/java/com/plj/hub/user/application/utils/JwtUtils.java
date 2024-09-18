@@ -29,6 +29,7 @@ public class JwtUtils {
                 .id(user.getId().toString())
                 .subject(user.getUsername())
                 .claim("role", user.getRole())
+                .claim("isActivated", user.getIsActivated())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 ))// 토큰 만료 시간 (1시간)
                 .signWith(key)  // HMAC SHA-256 알고리즘으로 서명

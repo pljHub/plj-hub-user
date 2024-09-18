@@ -1,9 +1,6 @@
 package com.plj.hub.user.presentation.controller;
 
-import com.plj.hub.user.application.dto.requestdto.SignInRequestDto;
-import com.plj.hub.user.application.dto.requestdto.SignUpRequestDto;
-import com.plj.hub.user.application.dto.requestdto.UpdateHubRequestDto;
-import com.plj.hub.user.application.dto.requestdto.UpdateSlackIdRequestDto;
+import com.plj.hub.user.application.dto.requestdto.*;
 import com.plj.hub.user.application.dto.responsedto.*;
 import com.plj.hub.user.application.service.UserService;
 import com.plj.hub.user.global.dto.ResponseDto;
@@ -54,12 +51,11 @@ public class UserController {
      * 슬랙 정보 수정
      */
 
-    @PatchMapping("/{id}/slack")
+    @PatchMapping("/slack")
     public ResponseEntity<ResponseDto<UpdateSlackIdResponseDto>> updateSlackId(
-            @PathVariable(name = "id") Long userId,
             @Login CurrentUser currentUser,
             @RequestBody UpdateSlackIdRequestDto updateSlackIdRequestDto) {
-        UpdateSlackIdResponseDto updateSlackIdResponse = userService.updateSlackId(userId, currentUser.getCurrentUserId(), currentUser.getCurrentUserRole(), updateSlackIdRequestDto.getSlackId());
+        UpdateSlackIdResponseDto updateSlackIdResponse = userService.updateSlackId(currentUser.getCurrentUserId(), updateSlackIdRequestDto.getSlackId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.success(HttpStatus.OK.name(), updateSlackIdResponse));
@@ -125,5 +121,27 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.success(HttpStatus.OK.name(), getUsersResponse));
+    }
+
+    /*
+     * 슬랙 인증 코드 요청
+     */
+    @PostMapping("/secure-code")
+    public ResponseEntity<ResponseDto<SendSlackSecureCodeResponseDto>> getSecureCode(@Login CurrentUser currentUser) {
+        SendSlackSecureCodeResponseDto sendSlackSecureCodeResponse = userService.sendSlackSecureCode(currentUser.getCurrentUserId());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.success(HttpStatus.OK.name(), sendSlackSecureCodeResponse));
+    }
+
+    /*
+     * 인증 번호 확인 후 활성화
+     */
+    @PostMapping("/activate")
+    public ResponseEntity<ResponseDto<ActivateAccountResponseDto>> activateAccount(@Login CurrentUser currentUser, @RequestBody ActivateAccountRequestDto activateAccountRequestDto) {
+        ActivateAccountResponseDto activateAccountResponseDto = userService.activateAccount(currentUser.getCurrentUserId(), activateAccountRequestDto.getSecureCode());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.success(HttpStatus.OK.name(), activateAccountResponseDto));
     }
 }

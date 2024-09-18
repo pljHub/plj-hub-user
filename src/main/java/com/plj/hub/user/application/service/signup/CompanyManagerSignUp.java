@@ -2,8 +2,7 @@ package com.plj.hub.user.application.service.signup;
 
 import com.plj.hub.user.domain.model.CompanyManager;
 import com.plj.hub.user.domain.model.User;
-import com.plj.hub.user.infrastructure.client.Hub.HubClient;
-import com.plj.hub.user.infrastructure.client.Hub.HubClientService;
+import com.plj.hub.user.infrastructure.client.hub.HubClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

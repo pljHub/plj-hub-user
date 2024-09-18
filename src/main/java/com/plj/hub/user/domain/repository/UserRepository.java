@@ -16,11 +16,13 @@ public interface UserRepository {
 
     boolean existsByUsername(String username);
 
-    Optional<User> findByIdAndDeletedAtIsNull(Long id);
+    Optional<User> findByIdAndDeletedAtIsNullAndIsActivatedIsTrue(Long id);
 
     boolean existsBySlackId(String slackId);
 
-    Page<User> findAllByHubIdAndDeletedAtIsNull(UUID hubId, Pageable pageable);
+    Page<User> findAllByHubIdAndDeletedAtIsNullAndIsActivatedIsTrue(UUID hubId, Pageable pageable);
 
     Page<User> findAll(Pageable pageable);
+
+    Optional<User> findByIdAndDeletedAtIsNull(Long userId);
 }

@@ -25,6 +25,9 @@ public abstract class User extends AuditRecord{
     @Column
     private String slackId;
 
+    @Column(nullable = true)
+    private Boolean isActivated = false;
+
     @Transient // DB에 저장되지 않지만 엔티티에 추가
     public String getRole() {
         return this.getClass().getAnnotation(DiscriminatorValue.class).value();
@@ -38,6 +41,7 @@ public abstract class User extends AuditRecord{
 
     public void changeSlackId(String slackId) {
         this.slackId = slackId;
+        isActivated = false;
     }
 
     public abstract void updateHubs(UUID hubId);
@@ -48,5 +52,9 @@ public abstract class User extends AuditRecord{
 
     public void deleteUser(User user) {
         delete(user);
+    }
+
+    public void activateUser() {
+        isActivated = true;
     }
 }

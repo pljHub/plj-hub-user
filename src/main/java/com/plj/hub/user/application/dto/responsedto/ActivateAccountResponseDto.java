@@ -7,10 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class SignInResponseDto {
-
+public class ActivateAccountResponseDto {
+    private Long userId;
     private String accessToken;
-    private boolean isActivated;
-
-
 }

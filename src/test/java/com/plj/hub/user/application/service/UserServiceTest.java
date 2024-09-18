@@ -1,8 +1,6 @@
 package com.plj.hub.user.application.service;
 
-import com.plj.hub.user.application.dto.responsedto.SignInResponseDto;
-import com.plj.hub.user.application.dto.responsedto.SignUpResponseDto;
-import com.plj.hub.user.application.dto.responsedto.UpdateHubResponseDto;
+import com.plj.hub.user.application.dto.responsedto.*;
 import com.plj.hub.user.application.exception.AccessDeniedException;
 import com.plj.hub.user.application.exception.PasswordMismatchException;
 import com.plj.hub.user.application.exception.UserNotExistsException;
@@ -16,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
@@ -29,6 +28,8 @@ class UserServiceTest {
     private JwtUtils jwtUtils;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @BeforeEach
     void beforeTest() {
@@ -36,7 +37,7 @@ class UserServiceTest {
         String password = "asdf123@";
         String confirmPassword = "asdf123@";
         UserRole role = UserRole.ADMIN;
-        String slackId = "admin123";
+        String slackId = "afewf";
 
         userService.signUp(username, password, confirmPassword, role, slackId, null, null);
         userService.signIn(username, password);
@@ -103,27 +104,11 @@ class UserServiceTest {
 
         String updateSlackId = "sjhty123@naver.com";
 
-        userService.updateSlackId(signUpResponseDto1.getUserId(), currentUserId, currentUserRole, updateSlackId);
+        userService.updateSlackId(signUpResponseDto1.getUserId(),  updateSlackId);
 
         User updatedUser = userRepository.findById(signUpResponseDto1.getUserId()).get();
         Assertions.assertThat(updatedUser.getSlackId()).isEqualTo(updateSlackId);
 
-        // ADMIN 으로 수정하기 테스트
-
-        userService.signUp(username2, password2, confirmPassword2, role2, slackId2, null, null);
-
-        SignInResponseDto signInResponseDto2 = userService.signIn(username2, password2);
-        String accessToken2 = signInResponseDto2.getAccessToken();
-
-        Long currentUserId2 = Long.parseLong(jwtUtils.extractUserId(accessToken2));
-        String currentUserRole2 = jwtUtils.extractUserRole(accessToken2);
-
-        String updateSlackId2 = "sjhty123aaa@naver.com";
-
-        userService.updateSlackId(signUpResponseDto1.getUserId(), currentUserId2, currentUserRole2, updateSlackId2);
-
-        User updatedUser1 = userRepository.findById(signUpResponseDto1.getUserId()).get();
-        Assertions.assertThat(updatedUser1.getSlackId()).isEqualTo(updateSlackId2);
     }
 
     @Test
@@ -153,26 +138,10 @@ class UserServiceTest {
 
         String updateSlackId = "sjhty123@naver.com";
 
-        userService.updateSlackId(signUpResponseDto1.getUserId(), currentUserId, currentUserRole, updateSlackId);
+        userService.updateSlackId(signUpResponseDto1.getUserId(), updateSlackId);
 
         User updatedUser = userRepository.findById(signUpResponseDto1.getUserId()).get();
         Assertions.assertThat(updatedUser.getSlackId()).isEqualTo(updateSlackId);
-
-        // ADMIN 으로 수정하기 테스트
-
-        userService.signUp(username2, password2, confirmPassword2, role2, slackId2, null, null);
-
-        SignInResponseDto signInResponseDto2 = userService.signIn(username2, password2);
-        String accessToken2 = signInResponseDto2.getAccessToken();
-
-        Long currentUserId2 = Long.parseLong(jwtUtils.extractUserId(accessToken2));
-        String currentUserRole2 = jwtUtils.extractUserRole(accessToken2);
-
-        String updateSlackId2 = "sjhty123aaa@naver.com";
-        Long userId = signUpResponseDto1.getUserId();
-
-        org.junit.jupiter.api.Assertions.assertThrows(AccessDeniedException.class,
-                () -> userService.updateSlackId(userId, currentUserId2, currentUserRole2, updateSlackId2));
     }
 
     @Test
@@ -191,5 +160,36 @@ class UserServiceTest {
 
         UpdateHubResponseDto updateHubResponse = userService.updateHub(signUpResponseDto.getUserId(), 1L, "ADMIN", toUpdateHubId);
         Assertions.assertThat(updateHubResponse.getHubId()).isEqualTo(toUpdateHubId);
+    }
+
+    @Test
+    void getPassword() {
+        String encode = bCryptPasswordEncoder.encode("asdf1234!");
+        System.out.println("encode = " + encode);
+    }
+
+    @Test
+    @Transactional
+    void sendSecureCode() {
+
+        String username = "sjhty";
+        String password = "asdf123@";
+        String confirmPassword = "asdf123@";
+        UserRole role = UserRole.ADMIN;
+        String slackId = "tkdgns5817@gmail.com";
+
+        SignUpResponseDto signUpResponseDto = userService.signUp(username, password, confirmPassword, role, slackId, null, null);
+
+        GetUserResponseDto userInternal = userService.getUserInternal(signUpResponseDto.getUserId());
+
+        Long loginUserId = userInternal.getId();
+        String slackId1 = userInternal.getSlackId();
+
+        System.out.println("slackId1 = " + slackId1 +" userId = " + loginUserId);
+
+        SendSlackSecureCodeResponseDto activeAccountResponseDto = userService.sendSlackSecureCode(signUpResponseDto.getUserId());
+        String secureCode = activeAccountResponseDto.getSecureCode();
+        System.out.println("secureCode = " + secureCode);
+
     }
 }

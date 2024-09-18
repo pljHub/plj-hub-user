@@ -7,10 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class SignInResponseDto {
+public class SendSlackSecureCodeResponseDto {
 
-    private String accessToken;
-    private boolean isActivated;
-
-
+    private Long userId;
+    private String secureCode;
 }

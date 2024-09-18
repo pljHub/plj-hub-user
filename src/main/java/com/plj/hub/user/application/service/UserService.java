@@ -5,19 +5,25 @@ import com.plj.hub.user.application.exception.*;
 import com.plj.hub.user.application.service.signup.SignUp;
 import com.plj.hub.user.application.service.signup.SignUpAdapter;
 import com.plj.hub.user.application.utils.JwtUtils;
+import com.plj.hub.user.application.utils.VerificationCodeGenerator;
 import com.plj.hub.user.domain.model.User;
 import com.plj.hub.user.domain.model.UserRole;
 import com.plj.hub.user.domain.repository.UserRepository;
-import com.plj.hub.user.infrastructure.client.Hub.HubClientService;
+import com.plj.hub.user.infrastructure.client.aislack.AiSlackClient;
+import com.plj.hub.user.infrastructure.client.aislack.AiSlackClientService;
+import com.plj.hub.user.infrastructure.client.hub.HubClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +35,12 @@ public class UserService {
     private final SignUpAdapter signUpAdapter;
     private final JwtUtils jwtUtils;
     private final HubClientService hubClientService;
+    @Value("${slack.link}")
+    private String slackLink;
+    private final AiSlackClient aiSlackClient;
+    private final VerificationCodeGenerator verificationCodeGenerator;
+    private final AiSlackClientService aiSlackClientService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     /*
      * 회원 가입
@@ -47,7 +59,7 @@ public class UserService {
 
         log.info("회원 가입 성공 username: {}, userRole: {}, slackId: {}, companyId: {}", username, userRole, slackId, companyId);
 
-        return new SignUpResponseDto(savedUser.getId(), savedUser.getUsername(), savedUser.getRole());
+        return new SignUpResponseDto(savedUser.getId(), savedUser.getUsername(), savedUser.getRole(), slackLink);
     }
 
 
@@ -100,7 +112,7 @@ public class UserService {
 
         log.info("로그인 성공 username: {}", username);
 
-        return new SignInResponseDto(accessToken);
+        return new SignInResponseDto(accessToken, user.getIsActivated());
 
     }
 
@@ -119,30 +131,93 @@ public class UserService {
     }
 
     /*
+     * 슬랙 인증 번호 전송
+     */
+    public SendSlackSecureCodeResponseDto sendSlackSecureCode(Long currentUserId) {
+
+        log.info("계정 활성화 요청 currnetUserId: {}", currentUserId);
+
+        User currentUser = findUserByIdIncludeNotActivated(currentUserId);
+
+        String slackId = currentUser.getSlackId();
+
+        if (isActivatedUser(currentUser)) {
+            throw new UserAlreadyActivated();
+        }
+
+        String secureCode = verificationCodeGenerator.secureCodeGenerator();
+
+        aiSlackClientService.sendSecureCode(currentUser.getSlackId(), secureCode);
+
+        String redisKey = "secureCode:" + currentUserId;  // Redis에서 고유하게 관리될 키 생성
+        redisTemplate.opsForValue().set(redisKey, secureCode, 10, TimeUnit.MINUTES);
+
+        return new SendSlackSecureCodeResponseDto(currentUserId, secureCode);
+    }
+
+    // 활성화된 유저인지 검증
+    private boolean isActivatedUser(User user) {
+        return user.getIsActivated();
+    }
+
+    /*
+     * 계정 활성화
+     */
+    public ActivateAccountResponseDto activateAccount(Long currentUserId, String secureCode) {
+        User currentUser = findUserByIdIncludeNotActivated(currentUserId);
+
+        if (isActivatedUser(currentUser)) {
+            throw new UserAlreadyActivated();
+        }
+
+        String redisSecureCode = redisTemplate.opsForValue().get("secureCode:" + currentUserId);
+
+        if (redisSecureCode == null) {
+            throw new SecureCodeExpiredException();
+        }
+
+        if (!secureCode.equals(redisSecureCode)) {
+            throw new SecureCodeNotMatchException();
+        }
+
+        currentUser.activateUser();
+
+        userRepository.save(currentUser);
+
+        redisTemplate.delete("secureCode:" + currentUserId);
+
+        String accessToken = jwtUtils.generateToken(currentUser);
+
+        return new ActivateAccountResponseDto(currentUserId, accessToken);
+    }
+
+    /*
      * 회원 정보 수정 (slackId 변경)
      */
-    public UpdateSlackIdResponseDto updateSlackId(Long userId, Long currentUserId, String currentUserRole, String slackId) {
+    public UpdateSlackIdResponseDto updateSlackId(Long currentUserId,  String slackId) {
 
-        log.info("slackId 업데이트 요청 userId: {}, currentUserId {}", userId, currentUserId);
+        log.info("slackId 업데이트 요청 currentUserId {}", currentUserId);
 
-        if (!UserRole.valueOf(currentUserRole).equals(UserRole.ADMIN) && !userId.equals(currentUserId)) {
-            log.warn("slackId 업데이트 요청 실패 userId: {}, currentUserId {}", userId, currentUserId);
-            throw new AccessDeniedException();
-        }
+        User currentUser = findUserByIdIncludeNotActivated(currentUserId);
 
         verifyDuplicatedSlackId(slackId);
 
-        User user = findUserById(userId);
-        user.changeSlackId(slackId);
+        currentUser.changeSlackId(slackId);
 
-        User updatedUser = userRepository.save(user);
+        User updatedUser = userRepository.save(currentUser);
 
-        log.info("slackId 업데이트 요청 userId: {}, currentUserIdL {}", userId, currentUserId);
+        sendSlackSecureCode(updatedUser.getId());
+
+        log.info("slackId 업데이트 요청 currentUserIdL {}", currentUserId);
 
         return new UpdateSlackIdResponseDto(updatedUser.getUsername(), updatedUser.getSlackId());
     }
 
     private User findUserById(Long userId) {
+        return userRepository.findByIdAndDeletedAtIsNullAndIsActivatedIsTrue(userId).orElseThrow(UserNotExistsException::new);
+    }
+
+    private User findUserByIdIncludeNotActivated(Long userId) {
         return userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(UserNotExistsException::new);
     }
 
@@ -264,7 +339,7 @@ public class UserService {
 
         if (isHubManager(currentUserRole)) {
             log.info("유저 전체 조회 요청 성공 currentUserId: {}, currentUserRole: {}", currentUserId, currentUserRole);
-            users = userRepository.findAllByHubIdAndDeletedAtIsNull(currentUser.getHubId(), pageable);
+            users = userRepository.findAllByHubIdAndDeletedAtIsNullAndIsActivatedIsTrue(currentUser.getHubId(), pageable);
         } else if (UserRole.ADMIN.equals(UserRole.valueOf(currentUserRole))) {
             log.info("유저 전체 조회 요청 성공 currentUserId: {}, currentUserRole: {}", currentUserId, currentUserRole);
             users = userRepository.findAll(pageable);

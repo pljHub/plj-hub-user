@@ -9,10 +9,13 @@ public class SignUpResponseDto {
     private Long userId;
     private String username;
     private String role;
+    private String slackLink;
 
-    public SignUpResponseDto(Long userId, String username, String role) {
+
+    public SignUpResponseDto(Long userId, String username, String role, String slackLink) {
         this.userId = userId;
         this.username = username;
         this.role = role;
+        this.slackLink = slackLink;
     }
 }
