@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -46,6 +47,7 @@ public class UserService {
      * 회원 가입
      */
 
+    @Transactional
     public SignUpResponseDto signUp(String username, String password, String confirmPassword, UserRole userRole, String slackId, UUID hubId, UUID companyId) {
 
         log.info("회원 가입 요청 username: {}, userRole: {}, slackId: {}, companyId: {}", username, userRole, slackId, companyId);
@@ -100,6 +102,7 @@ public class UserService {
      * 로그인
      */
 
+    @Transactional(readOnly = true)
     public SignInResponseDto signIn(String username, String password) {
 
         log.info("로그인 요청 username: {}", username);
@@ -133,13 +136,12 @@ public class UserService {
     /*
      * 슬랙 인증 번호 전송
      */
+    @Transactional(readOnly = true)
     public SendSlackSecureCodeResponseDto sendSlackSecureCode(Long currentUserId) {
 
         log.info("계정 활성화 요청 currnetUserId: {}", currentUserId);
 
         User currentUser = findUserByIdIncludeNotActivated(currentUserId);
-
-        String slackId = currentUser.getSlackId();
 
         if (isActivatedUser(currentUser)) {
             throw new UserAlreadyActivated();
@@ -163,6 +165,7 @@ public class UserService {
     /*
      * 계정 활성화
      */
+    @Transactional
     public ActivateAccountResponseDto activateAccount(Long currentUserId, String secureCode) {
         User currentUser = findUserByIdIncludeNotActivated(currentUserId);
 
@@ -194,6 +197,7 @@ public class UserService {
     /*
      * 회원 정보 수정 (slackId 변경)
      */
+    @Transactional
     public UpdateSlackIdResponseDto updateSlackId(Long currentUserId,  String slackId) {
 
         log.info("slackId 업데이트 요청 currentUserId {}", currentUserId);
@@ -224,6 +228,7 @@ public class UserService {
     /*
      * 회원 정보 수정 hub
      */
+    @Transactional
     public UpdateHubResponseDto updateHub(Long userId, Long currentUserId, String currentUserRole, UUID hubId) {
         log.info("hub 업데이트 요청 userId: {}, currentUserId {}", userId, currentUserId);
 
@@ -256,6 +261,7 @@ public class UserService {
     /*
      * 유저 삭제
      */
+    @Transactional
     public DeleteUserResponseDto deleteUser(Long userId, Long currentUserId, String currentUserRole) {
 
         log.info("유저 삭제 요청 userId: {}, currentUserId: {}, currentUserRole: {}", userId, currentUserId, currentUserRole);
@@ -279,6 +285,7 @@ public class UserService {
     /*
      * 유저 단 건 조회
      */
+    @Transactional(readOnly = true)
     public GetUserResponseDto getUser(Long userId, Long currentUserId, String currentUserRole) {
 
         log.info("유저 단 건 조회 요청 userId: {}, currentUserId: {}, currentUserRole: {}", userId, currentUserId, currentUserRole);
@@ -306,6 +313,7 @@ public class UserService {
     /*
      * 유저 단 건 조회 내부 호출
      */
+    @Transactional(readOnly = true)
     public GetUserResponseDto getUserInternal(Long userId) {
 
         log.info("유저 단 건 조회 내부 요청 userId: {}", userId);
@@ -329,6 +337,7 @@ public class UserService {
      * 유저 전체 조회
      */
 
+    @Transactional(readOnly = true)
     public Page<GetUserResponseDto> getUsers(Long currentUserId, String currentUserRole, Pageable pageable) {
 
         log.info("유저 전체 조회 요청 currentUserId: {}, currentUserRole: {}", currentUserId, currentUserRole);

@@ -54,7 +54,7 @@ public class UserController {
     @PatchMapping("/slack")
     public ResponseEntity<ResponseDto<UpdateSlackIdResponseDto>> updateSlackId(
             @Login CurrentUser currentUser,
-            @RequestBody UpdateSlackIdRequestDto updateSlackIdRequestDto) {
+            @Valid @RequestBody UpdateSlackIdRequestDto updateSlackIdRequestDto) {
         UpdateSlackIdResponseDto updateSlackIdResponse = userService.updateSlackId(currentUser.getCurrentUserId(), updateSlackIdRequestDto.getSlackId());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -69,7 +69,7 @@ public class UserController {
     public ResponseEntity<ResponseDto<UpdateHubResponseDto>> updateHubId(
             @PathVariable(name = "id") Long userId,
             @Login CurrentUser currentUser,
-            @RequestBody UpdateHubRequestDto updateHubRequestDto) {
+            @Valid @RequestBody UpdateHubRequestDto updateHubRequestDto) {
         UpdateHubResponseDto updateHubResponse = userService.updateHub(userId, currentUser.getCurrentUserId(), currentUser.getCurrentUserRole(), updateHubRequestDto.getHubId());
         return ResponseEntity
                 .status(HttpStatus.OK)
