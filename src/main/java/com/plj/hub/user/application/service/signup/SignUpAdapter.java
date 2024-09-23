@@ -17,25 +17,7 @@ public class SignUpAdapter {
     @Autowired
     public SignUpAdapter(List<SignUp> signUpHandlerList) {
         for (SignUp signUpHandler : signUpHandlerList) {
-            if (signUpHandler instanceof AdminSignUp) {
-                signUpHandlerMap.put(UserRole.ADMIN, signUpHandler);
-            }
-
-            if (signUpHandler instanceof CompanyDeliveryUserSignUp) {
-                signUpHandlerMap.put(UserRole.COMPANY_DELIVERY_USER, signUpHandler);
-            }
-
-            if (signUpHandler instanceof HubManagerSignUp) {
-                signUpHandlerMap.put(UserRole.HUB_MANAGER, signUpHandler);
-            }
-
-            if (signUpHandler instanceof HubDeliveryUserSignUp) {
-                signUpHandlerMap.put(UserRole.HUB_DELIVERY_USER, signUpHandler);
-            }
-
-            if (signUpHandler instanceof CompanyManagerSignUp) {
-                signUpHandlerMap.put(UserRole.COMPANY_MANAGER, signUpHandler);
-            }
+            signUpHandlerMap.put(signUpHandler.getPerimitUserRole(), signUpHandler);
         }
     }
 
