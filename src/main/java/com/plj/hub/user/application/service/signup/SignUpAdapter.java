@@ -31,5 +31,4 @@ public class SignUpAdapter {
     private boolean supports(UserRole userRole) {
         return signUpHandlerMap.containsKey(userRole);
     }
-
 }
